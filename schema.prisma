@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Assessment {
+  id              String   @id @default(cuid())
+  email           String
+  company         String
+  role            String?
+  status          String   @default("PENDING")
+  readinessScore  Float?
+  reportUrl       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  answers         Answer[]
+  scores          Score[]
+  files           File[]
+}
+
+model Answer {
+  id           String     @id @default(cuid())
+  assessmentId String
+  questionId   String
+  value        String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+}
+
+model Score {
+  id           String     @id @default(cuid())
+  assessmentId String
+  dimension    String
+  value        Float
+  max          Float      @default(100)
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+}
+
+model File {
+  id           String     @id @default(cuid())
+  assessmentId String
+  filename     String
+  path         String
+  fileType     String
+  size         Int
+  uploadedAt   DateTime   @default(now())
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+}
